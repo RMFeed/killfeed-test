@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: transparent; color: white; font-family: 'Montserrat', sans-serif; width: 100vw; height: 100vh; overflow: hidden; }
+
+        #killfeed_container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .feed_entry {
+            background: rgba(10, 12, 18, 0.92);
+            border-radius: 4px;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-right: 4px solid #444; /* Sağ tarafa çektik, göz takibi kolaylaşsın */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            min-width: 280px;
+            /* Performans için basit ama şık giriş */
+            animation: fastIn 0.3s ease-out forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes fastIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .fade-out { animation: fastOut 0.4s ease-in forwards !important; }
+        @keyframes fastOut {
+            to { opacity: 0; transform: translateX(50px); }
+        }
+
+        /* Taraf Renkleri - Performans için Glow yerine Solid Gradient */
+        .theme_seherbaz { border-right-color: #e74c3c; background: linear-gradient(90deg, rgba(60, 15, 15, 0.95), rgba(10, 12, 18, 0.95)); }
+        .theme_olumyiyen { border-right-color: #2ecc71; background: linear-gradient(90deg, rgba(15, 40, 15, 0.95), rgba(10, 12, 18, 0.95)); }
+
+        .attacker { font-weight: 700; color: #fff; font-size: 0.95rem; }
+        .victim { font-weight: 600; color: #aaa; font-size: 0.9rem; }
+
+        .weapon_icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .weapon_icon img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* FPS Sayacı veya Debug için (İsteğe bağlı) */
+        #test_panel { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 5px; opacity: 0.3; transition: 0.3s; }
+        #test_panel:hover { opacity: 1; }
+        button { background: #222; color: #fff; border: 1px solid #444; padding: 5px 10px; cursor: pointer; font-size: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="killfeed_container"></div>
+
+    <div id="test_panel">
+        <button onclick="AddKillNotice('Harry Potter', 'Lord Voldemort', 1)">TEST AUROR</button>
+        <button onclick="AddKillNotice('Bellatrix', 'Sirius Black', 2)">TEST DEATH EATER</button>
+    </div>
+
+    <script>
+        const WANDS = {
+            auror: "https://i.imgur.com/ORx7ROn.png",
+            death: "https://i.imgur.com/Zu5zgMS.png"
+        };
+
+        // 128 kişilik yoğunluk için MAX_ENTRIES sınırı
+        const MAX_ENTRIES = 8; 
+
+        window.AddKillNotice = function(attackerName, victimName, side) {
+            const container = document.getElementById('killfeed_container');
+            
+            // Eğer çok fazla kill gelirse en eskisini anında sil (Performans Sınırı)
+            if (container.children.length >= MAX_ENTRIES) {
+                container.lastElementChild.remove();
+            }
+
+            const entry = document.createElement('div');
+            entry.className = 'feed_entry';
+            
+            let iconSrc = "";
+            if (side === 1) { entry.classList.add('theme_seherbaz'); iconSrc = WANDS.auror; }
+            else if (side === 2) { entry.classList.add('theme_olumyiyen'); iconSrc = WANDS.death; }
+
+            entry.innerHTML = `
+                <span class="attacker">${attackerName}</span>
+                <div class="weapon_icon"><img src="${iconSrc}"></div>
+                <span class="victim">${victimName}</span>
+            `;
+
+            container.prepend(entry);
+
+            // 5 Saniye tut, sonra kaldır
+            setTimeout(() => {
+                entry.classList.add('fade-out');
+                setTimeout(() => entry.remove(), 400);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
